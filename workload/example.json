@@ -1,0 +1,51 @@
+{
+    "title": "Canonical Observability Stack",
+    "tagline": "Model-driven observability stack deployed with a single command",
+    "description": "Canonical Observability Stack Lite, or COS Lite, is a light-weight, highly-integrated, Juju-based observability suite running on Kubernetes.",
+    "apps": [
+        {
+            "name": "Prometheus",
+            "icon": "graph-line-variant",
+            "description": "Prometheus collects and stores metrics as time series data, i.e. metrics information is stored with the timestamp at which it was recorded, alongside optional key-value pairs called labels.",
+            "url": "https://prometheus.io/"
+        },
+        {
+            "name": "Grafana",
+            "icon": "graph-line",
+            "description": "Query, visualize, and understand your data. With Grafana you can create, explore and share all of your data through beautiful, flexible dashboards.",
+            "url": "https://grafana.com/"
+
+        },
+        {
+            "name": "Alertmanager",
+            "icon": "exclamation",
+            "description": "Query, visualize, and understand your data. With Grafana you can create, explore and share all of your data through beautiful, flexible dashboards."
+        }
+    ],
+    "links": [
+        {
+            "category": "Documentation",
+            "items": [
+              {
+                "name": "Charmhub",
+                "url": "https://charmhub.io"
+              }
+            ]
+          },
+          {
+            "category": "Social",
+            "items": [
+              {
+                "name": "Mattermost",
+                "url": "https://chat.charmhub.io",
+                "target": "_blank"
+              },
+              {
+                "name": "Discourse",
+                "url": "https://discourse.charmhub.io",
+                "target": "_blank"
+              }
+            ]
+          }
+    ]
+}

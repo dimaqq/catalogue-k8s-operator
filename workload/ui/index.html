@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="COS Dashboard">
+  <meta content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    name="viewport" />
+  <link rel="stylesheet" href="./assets/vanilla-framework-3.7.1.min.css" />
+  <link rel="stylesheet" href="./assets/ui.css" />
+  <script src="./assets/handlebars.min.js"></script>
+  <script src="./assets/iconify.min.js"></script>
+
+</head>
+<script type="text/handlebars-template" id="root-template">
+ <header id="navigation" class="p-navigation is-dark">
+    <div class="p-navigation__row">
+      <div class="p-navigation__banner">
+        <div class="p-navigation__tagged-logo">
+          <a class="p-navigation__link" href="#">
+            <div class="p-navigation__logo-tag">
+              <img class="p-navigation__logo-icon" src="https://assets.ubuntu.com/v1/82818827-CoF_white.svg" alt="">
+            </div>
+            <span class="p-navigation__logo-title" id="nav">
+                {{title}}
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="p-strip--suru">
+    <div class="row">
+      <div class="col-12">
+        {{#if tagline}}
+          <h1>{{tagline}}</h1>
+        {{/if}}
+        {{#if description}}
+          <p>{{description}}</p>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+  <div class="p-strip">
+    <div class="row">
+      <div class="col12">
+        <h3>Applications</h3>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        {{#if apps}}
+        <ul class="p-matrix" id="apps">
+          {{! --- Apps --- }}
+          {{#each apps}}
+             <li class="p-matrix__item">
+              <div class="p-matrix__img">
+                <span class="iconify icon md-48" data-icon="mdi-{{icon}}"></span>
+              </div>
+              <div class="p-matrix__content">
+                <h3 class="p-matrix__title"><a class="p-matrix__link" href="{{url}}">{{name}}</a></h3>
+                {{#if description}}
+                <p class="p-matrix__desc">{{description}}</p>
+                {{/if}}  
+              </div>
+            </li>
+            {{/each}}
+        </ul>
+        {{else}}
+        <div class="p-notification--caution">
+          <div class="p-notification__content">
+            <h5 class="p-notification__title">No items to display</h5>
+            <p class="p-notification__message">No applications available for display yet. Add some by relating compatible charms to this one.</p>
+          </div>
+        </div>
+        <span>
+          
+        </span>
+        {{/if}}
+      </div>
+    </div>
+    {{#if links}}
+    <div class="row">
+      <div class="col12">
+        <h3>Links</h3>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <ul class="p-matrix" id="links">
+          {{! --- Links --- }}
+          {{#each links}}
+          <li class="p-matrix__item">
+            {{#if category}}
+            <div class="p-matrix__img">
+              <span class="iconify icon md-48" data-icon="mdi-bookmark"></span>
+            </div>
+            <div class="p-matrix__content">
+              <h3 class="p-matrix__title">{{category}}</h3>
+              <ul class="link-list">
+                {{#each items}}
+                <li>
+                  <a href="{{url}}" {{#if target}}target="{{target}}"{{/if}}>
+                    {{name}}
+                  </a>
+                </li>
+                {{/each}}
+              </ul>
+            </div>
+            {{/if}}
+          </li>
+          {{/each}}
+      </div>
+    </div>
+    {{/if}}
+  </div>
+</script>
+
+<body id="root"></body>
+<script src="./assets/ui.js" type="text/javascript"></script>
+
+</html>
