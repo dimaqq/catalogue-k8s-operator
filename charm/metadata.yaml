@@ -1,0 +1,18 @@
+name: landing-page-k8s
+description: Landing page for discovering charm UIs
+summary: |
+  The landing page is a charmed operator helping users to locate the user interfaces of the charms related to it.
+
+containers:
+  landing-page:
+    resource: server-image
+
+provides:
+  landing-page:
+    interface: catalog
+
+resources:
+  server-image:
+    type: oci-image
+    description: OCI image for the landing page
+    upstream-source: ghcr.io/canonical/landing-page-k8s-operator:latest

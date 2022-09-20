@@ -1,0 +1,51 @@
+options:
+  title:
+    type: string
+    description: Title to display in the navigation bar.
+    default: Landing page
+
+  tagline:
+    type: string
+    description: |
+      A one-liner that communicates the core value or purpose of the 
+      bundle it is part of.
+    default: Easy access to Charmed UIs
+
+  description:
+    type: string
+    description: |
+      A somewhat longer description of the bundle or set of charms the
+      landing page is part of.
+  
+  links:
+    type: string
+    description: |
+      JSON string containing the links to display on the landing page. 
+      Contains links to Charmhub, Mattermost and Discourse by default.
+    default: |
+      [
+        {
+          "category": "Documentation",
+          "items": [
+            {
+              "name": "Charmhub",
+              "url": "https://charmhub.io"
+            }
+          ]
+        },
+        {
+          "category": "Social",
+          "items": [
+            {
+              "name": "Mattermost",
+              "url": "https://chat.charmhub.io",
+              "target": "_blank"
+            },
+            {
+              "name": "Discourse",
+              "url": "https://discourse.charmhub.io",
+              "target": "_blank"
+            }
+          ]
+        }
+      ]
