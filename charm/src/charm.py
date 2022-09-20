@@ -9,6 +9,12 @@
 import json
 import logging
 
+from charms.traefik_k8s.v1.ingress import (
+    IngressPerAppRequirer,
+    IngressPerAppReadyEvent,
+    IngressPerAppRevokedEvent,
+)
+
 from charms.landing_page_k8s.v0.landing_page import (
     AppsChangedEvent,
     LandingPageProvider,
@@ -32,13 +38,25 @@ class LandingPageCharm(CharmBase):
     def __init__(self, *args):
         super().__init__(*args)
         self.name = "landing-page-k8s"
+
         self._info = LandingPageProvider(charm=self)
+        self._ingress = IngressPerAppRequirer(charm=self, port=80)
+
         self.framework.observe(
             self.on.landing_page_pebble_ready, self._on_landing_page_pebble_ready
         )
         self.framework.observe(self._info.on.apps_changed, self._on_apps_changed)
         self.framework.observe(self.on.upgrade_charm, self._on_upgrade)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
+        self.framework.observe(self._ingress.on.ready, self._on_ingress_ready)
+        self.framework.observe(self._ingress.on.revoked, self._on_ingress_revoked)
+
+    def _on_ingress_ready(self, event: IngressPerAppReadyEvent):
+        logger.info("This app's ingress URL: %s", event.url)
+    
+    def _on_ingress_revoked(self, event: IngressPerAppRevokedEvent):
+        logger.info("This app no longer has ingress")
+
 
     def _on_landing_page_pebble_ready(self, event):
         """Event handler for the pebble ready event."""

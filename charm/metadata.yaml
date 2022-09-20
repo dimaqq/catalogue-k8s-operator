@@ -11,6 +11,11 @@ provides:
   landing-page:
     interface: catalog
 
+requires:
+    ingress:
+        interface: ingress
+        limit: 1
+
 resources:
   server-image:
     type: oci-image
