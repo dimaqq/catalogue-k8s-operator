@@ -47,7 +47,7 @@ class CatalogueCharm(CharmBase):
         self._ingress = IngressPerAppRequirer(charm=self, port=80)
 
         self.framework.observe(self.on.catalogue_pebble_ready, self._on_catalogue_pebble_ready)
-        self.framework.observe(self._info.on.apps_changed, self._on_apps_changed)
+        self.framework.observe(self._info.on.items_changed, self._on_items_changed)
         self.framework.observe(self.on.upgrade_charm, self._on_upgrade)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(self._ingress.on.ready, self._on_ingress_ready)
@@ -78,7 +78,7 @@ class CatalogueCharm(CharmBase):
         container.autostart()
 
         try:
-            self.configure(self.apps)
+            self.configure(self.items)
         except:  # noqa
             self._update_status(BlockedStatus("Failed to write configuration"))
 
@@ -88,33 +88,33 @@ class CatalogueCharm(CharmBase):
         self.app.status = self.unit.status = status
 
     def _on_upgrade(self, event):
-        self.configure(self.apps)
+        self.configure(self.items)
 
     def _on_config_changed(self, event):
-        self.configure(self.apps)
+        self.configure(self.items)
 
-    def _on_apps_changed(self, event: CatalogueItemsChangedEvent):
-        self.configure(event.apps)
+    def _on_items_changed(self, event: CatalogueItemsChangedEvent):
+        self.configure(event.items)
 
-    def configure(self, apps):
+    def configure(self, items):
         """Reconfigures the catalogue, writing a new config file to the workload."""
         if not self.workload.can_connect():
             return
         if self.workload.exists(CONFIG_PATH):
             self.workload.remove_path(CONFIG_PATH)
 
-        logger.info("Configuring %s application entries", len(apps))
+        logger.info("Configuring %s application entries", len(items))
 
         self.workload.push(
-            CONFIG_PATH, json.dumps({**self.charm_config, "apps": apps}), make_dirs=True
+            CONFIG_PATH, json.dumps({**self.charm_config, "apps": items}), make_dirs=True
         )
 
     @property
-    def apps(self):
+    def items(self):
         """Applications to display in the catalogue."""
         if not self._info:
             return []
-        return self._info.apps
+        return self._info.items
 
     @property
     def workload(self):
