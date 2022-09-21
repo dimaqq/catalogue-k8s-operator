@@ -1,15 +1,15 @@
-name: landing-page-k8s
-description: Landing page for discovering charm UIs
+name: catalogue-k8s
+description: catalogue for discovering charm UIs
 summary: |
-  The landing page is a charmed operator helping users to locate the user interfaces of the charms related to it.
+  The catalogue is a charmed operator helping users to locate the user interfaces of the charms related to it.
 
 containers:
-  landing-page:
-    resource: server-image
+  catalogue:
+    resource: catalogue-image
 
 provides:
-  landing-page:
-    interface: catalog
+  catalogue:
+    interface: catalogue
 
 requires:
     ingress:
@@ -17,7 +17,7 @@ requires:
         limit: 1
 
 resources:
-  server-image:
+  catalogue-image:
     type: oci-image
-    description: OCI image for the landing page
-    upstream-source: ghcr.io/canonical/landing-page-k8s-operator:latest
+    description: OCI image for the service catalogue
+    upstream-source: ghcr.io/canonical/catalogue-k8s-operator:latest

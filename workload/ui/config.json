@@ -1,7 +1,7 @@
 {
-    "title": "Landing page",
-    "tagline": "An excellent landing page",
-    "description": "The landing page charm is a way for charm authors to show you the UIs available through the charms they write.",
+    "title": "Service Catalogue",
+    "tagline": "Easy discovery of charm UIs",
+    "description": "The service catalogue charm is a way for charm authors to show you the UIs and services they have made available through the charms they write.",
     "apps": [],
     "links": []
 }

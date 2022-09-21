@@ -2,7 +2,7 @@ options:
   title:
     type: string
     description: Title to display in the navigation bar.
-    default: Landing page
+    default: Service Catalogue
 
   tagline:
     type: string
@@ -15,12 +15,12 @@ options:
     type: string
     description: |
       A somewhat longer description of the bundle or set of charms the
-      landing page is part of.
+      catalogue is displaying.
   
   links:
     type: string
     description: |
-      JSON string containing the links to display on the landing page. 
+      JSON string containing the links to display in the catalogue. 
       Contains links to Charmhub, Mattermost and Discourse by default.
     default: |
       [

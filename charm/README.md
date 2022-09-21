@@ -1,8 +1,8 @@
-# Landing Page
+# Service Catalogue
 
 ## Description
 
-The landing page is a charmed operator helping users to locate the user interfaces of charms it relates to. 
+The service catalogue is a charmed operator helping users to locate the user interfaces of charms it relates to. 
 
 ## Usage
 

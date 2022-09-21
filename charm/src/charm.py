@@ -4,21 +4,22 @@
 #
 # Learn more at: https://juju.is/docs/sdk
 
-"""Charmed operator for creating landing pages on Kubernetes."""
+"""Charmed operator for creating service catalogues on Kubernetes."""
 
 import json
 import logging
 
+from charms.catalogue_k8s.v0.catalogue import (
+    CatalogueItemsChangedEvent,
+    CatalogueProvider,
+)
+from charms.observability_libs.v1.kubernetes_service_patch import KubernetesServicePatch
 from charms.traefik_k8s.v1.ingress import (
-    IngressPerAppRequirer,
     IngressPerAppReadyEvent,
+    IngressPerAppRequirer,
     IngressPerAppRevokedEvent,
 )
-
-from charms.landing_page_k8s.v0.landing_page import (
-    AppsChangedEvent,
-    LandingPageProvider,
-)
+from lightkube.models.core_v1 import ServicePort
 from ops.charm import CharmBase
 from ops.framework import StoredState
 from ops.main import main
@@ -30,21 +31,22 @@ ROOT_PATH = "/web"
 CONFIG_PATH = ROOT_PATH + "/config.json"
 
 
-class LandingPageCharm(CharmBase):
+class CatalogueCharm(CharmBase):
     """Charm the service."""
 
     _stored = StoredState()
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.name = "landing-page-k8s"
+        self.name = "catalogue-k8s"
 
-        self._info = LandingPageProvider(charm=self)
+        port = ServicePort(80, name=f"{self.app.name}")
+        self.service_patcher = KubernetesServicePatch(self, [port])
+
+        self._info = CatalogueProvider(charm=self)
         self._ingress = IngressPerAppRequirer(charm=self, port=80)
 
-        self.framework.observe(
-            self.on.landing_page_pebble_ready, self._on_landing_page_pebble_ready
-        )
+        self.framework.observe(self.on.catalogue_pebble_ready, self._on_catalogue_pebble_ready)
         self.framework.observe(self._info.on.apps_changed, self._on_apps_changed)
         self.framework.observe(self.on.upgrade_charm, self._on_upgrade)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
@@ -53,27 +55,26 @@ class LandingPageCharm(CharmBase):
 
     def _on_ingress_ready(self, event: IngressPerAppReadyEvent):
         logger.info("This app's ingress URL: %s", event.url)
-    
+
     def _on_ingress_revoked(self, event: IngressPerAppRevokedEvent):
         logger.info("This app no longer has ingress")
 
-
-    def _on_landing_page_pebble_ready(self, event):
+    def _on_catalogue_pebble_ready(self, event):
         """Event handler for the pebble ready event."""
         container = event.workload
         pebble_layer = {
-            "summary": "landing page layer",
-            "description": "pebble config layer for the landing page",
+            "summary": "catalogue layer",
+            "description": "pebble config layer for the catalogue",
             "services": {
-                "web": {
+                "catalogue": {
                     "override": "replace",
-                    "summary": "web",
+                    "summary": "catalogue",
                     "command": "python3 -m http.server 80",
                     "startup": "enabled",
                 }
             },
         }
-        container.add_layer("web", pebble_layer, combine=True)
+        container.add_layer("catalogue", pebble_layer, combine=True)
         container.autostart()
 
         try:
@@ -92,11 +93,11 @@ class LandingPageCharm(CharmBase):
     def _on_config_changed(self, event):
         self.configure(self.apps)
 
-    def _on_apps_changed(self, event: AppsChangedEvent):
+    def _on_apps_changed(self, event: CatalogueItemsChangedEvent):
         self.configure(event.apps)
 
     def configure(self, apps):
-        """Reconfigures the landing page, writing a new config file to the workload."""
+        """Reconfigures the catalogue, writing a new config file to the workload."""
         if not self.workload.can_connect():
             return
         if self.workload.exists(CONFIG_PATH):
@@ -110,7 +111,7 @@ class LandingPageCharm(CharmBase):
 
     @property
     def apps(self):
-        """Applications to display on the landing page."""
+        """Applications to display in the catalogue."""
         if not self._info:
             return []
         return self._info.apps
@@ -118,7 +119,7 @@ class LandingPageCharm(CharmBase):
     @property
     def workload(self):
         """The main workload of the charm."""
-        return self.unit.get_container("landing-page")
+        return self.unit.get_container("catalogue")
 
     @property
     def charm_config(self):
@@ -132,4 +133,4 @@ class LandingPageCharm(CharmBase):
 
 
 if __name__ == "__main__":
-    main(LandingPageCharm)
+    main(CatalogueCharm)

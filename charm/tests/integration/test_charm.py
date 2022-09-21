@@ -23,7 +23,7 @@ async def test_build_and_deploy(ops_test: OpsTest):
     # Then it should eventually go idle/active
 
     charm = await ops_test.build_charm(".")
-    resources = {"server-image": METADATA["resources"]["server-image"]["upstream-source"]}
+    resources = {"catalogue-image": METADATA["resources"]["catalogue-image"]["upstream-source"]}
     await ops_test.model.deploy(charm, resources=resources, application_name=APP_NAME)
 
     # issuing dummy update_status just to trigger an event

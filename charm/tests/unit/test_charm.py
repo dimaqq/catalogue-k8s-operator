@@ -5,56 +5,58 @@
 
 import json
 import unittest
+from unittest.mock import patch
 
-from charms.landing_page_k8s.v0.landing_page import DEFAULT_RELATION_NAME
+from charms.catalogue_k8s.v0.catalogue import DEFAULT_RELATION_NAME
 from ops.model import ActiveStatus
 from ops.testing import Harness
 
-from charm import LandingPageCharm
+from charm import CatalogueCharm
 
-CONTAINER_NAME = "landing-page"
+CONTAINER_NAME = "catalogue"
 
 
 class TestCharm(unittest.TestCase):
+    @patch("charm.KubernetesServicePatch", lambda x, y: None)
     def setUp(self):
-        self.harness = Harness(LandingPageCharm)
+        self.harness = Harness(CatalogueCharm)
         self.addCleanup(self.harness.cleanup)
         self.harness.begin_with_initial_hooks()
         self.harness.set_leader(True)
 
-    def test_landing_page_pebble_ready(self):
-        # Given the landing page container
+    def test_catalogue_pebble_ready(self):
+        # Given the catalogue container
         # When pebble is ready
-        # Then the landing page web server should be started
+        # Then the catalogue web server should be started
 
         initial_plan = self._plan
         self.assertEqual(initial_plan.to_yaml(), "{}\n")
 
         expected_plan = {
             "services": {
-                "web": {
+                "catalogue": {
                     "override": "replace",
-                    "summary": "web",
-                    "command": "httpd",
+                    "summary": "catalogue",
+                    "command": "python3 -m http.server 80",
                     "startup": "enabled",
                 }
             },
         }
 
-        self.harness.charm.on.landing_page_pebble_ready.emit(self._container)
+        self.harness.charm.on.catalogue_pebble_ready.emit(self._container)
 
         updated_plan = self._plan.to_dict()
         self.assertEqual(expected_plan, updated_plan)
 
-        service = self._container.get_service("web")
+        service = self._container.get_service("catalogue")
         self.assertTrue(service.is_running())
         self.assertEqual(self.harness.model.unit.status, ActiveStatus())
 
     def test_reconfigure_applications(self):
-        # Given the landing page and a remote charm
+        # Given the catalogue and a remote charm
         # When a relation is established
         # Then the remote charm should expose an application entry
-        # And the landing page should write the entry to its config
+        # And the catalogue should write the entry to its config
 
         rel_id = self.harness.add_relation(DEFAULT_RELATION_NAME, "rc")
         self.harness.add_relation_unit(rel_id, "rc/0")
@@ -69,7 +71,7 @@ class TestCharm(unittest.TestCase):
         )
 
         data = self._container.pull("/web/config.json")
-        self.assertEquals(
+        self.assertEqual(
             [
                 {
                     "name": "remote-charm",
