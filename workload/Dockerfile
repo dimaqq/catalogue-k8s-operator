@@ -1,8 +1,7 @@
-FROM python:3
+FROM nginx 
 
 WORKDIR /web
 COPY ./ui /web
+COPY ./nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
-
-ENTRYPOINT [ "python3", "-m", "http.server", "80"]

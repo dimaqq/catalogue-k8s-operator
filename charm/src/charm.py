@@ -69,7 +69,7 @@ class CatalogueCharm(CharmBase):
                 "catalogue": {
                     "override": "replace",
                     "summary": "catalogue",
-                    "command": "python3 -m http.server 80",
+                    "command": "nginx",
                     "startup": "enabled",
                 }
             },
