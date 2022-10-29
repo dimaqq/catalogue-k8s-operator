@@ -3,6 +3,9 @@ description: catalogue for discovering charm UIs
 summary: |
   The catalogue is a charmed operator helping users to locate the user interfaces of the charms related to it.
 
+assumes:
+  - k8s-api
+
 containers:
   catalogue:
     resource: catalogue-image
