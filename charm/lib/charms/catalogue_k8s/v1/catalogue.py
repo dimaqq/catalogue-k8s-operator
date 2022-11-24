@@ -6,7 +6,7 @@
 import ipaddress
 import logging
 import socket
-from typing import List, Optional, Union
+from typing import Callable, List, Optional, Union
 
 from ops.charm import CharmBase
 from ops.framework import BoundEvent, EventBase, EventSource, Object, ObjectEvents
@@ -36,14 +36,15 @@ class CatalogueConsumer(Object):
     def __init__(
         self,
         charm,
+        *,
         relation_name: str = DEFAULT_RELATION_NAME,
-        item: Optional[CatalogueItem] = None,
+        item_getter: Optional[Callable[[], CatalogueItem]] = None,
         refresh_event: Optional[Union[BoundEvent, List[BoundEvent]]] = None,
     ):
         super().__init__(charm, relation_name)
         self._charm = charm
         self._relation_name = relation_name
-        self._item = item
+        self._item_getter = item_getter
 
         events = self._charm.on[self._relation_name]
         self.framework.observe(events.relation_joined, self._on_relation_changed)
@@ -87,22 +88,26 @@ class CatalogueConsumer(Object):
         if not self._charm.unit.is_leader():
             return
 
-        if not self._item:
+        if not self._item_getter:
             return
 
+        item = self._item_getter()
+
         for relation in self._charm.model.relations[self._relation_name]:
-            relation.data[self._charm.model.app]["name"] = self._item.name
-            relation.data[self._charm.model.app]["description"] = self._item.description
+            relation.data[self._charm.model.app]["name"] = item.name
+            relation.data[self._charm.model.app]["description"] = item.description
             relation.data[self._charm.model.app]["url"] = self.unit_address(relation)
-            relation.data[self._charm.model.app]["icon"] = self._item.icon
+            relation.data[self._charm.model.app]["icon"] = item.icon
 
     def unit_address(self, relation):
         """The unit address of the consumer, on which it is reachable.
 
         Requires ingress to be connected for it to be routable.
         """
-        if self._item and self._item.url:
-            return self._item.url
+        if self._item_getter:
+            item = self._item_getter()
+            if item.url:
+                return item.url
 
         unit_ip = str(self._charm.model.get_binding(relation).network.bind_address)
         if self._is_valid_unit_address(unit_ip):
