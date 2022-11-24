@@ -9,7 +9,7 @@
 import json
 import logging
 
-from charms.catalogue_k8s.v0.catalogue import (
+from charms.catalogue_k8s.v1.catalogue import (
     CatalogueItemsChangedEvent,
     CatalogueProvider,
 )

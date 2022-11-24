@@ -12,8 +12,8 @@ from ops.charm import CharmBase
 from ops.framework import BoundEvent, EventBase, EventSource, Object, ObjectEvents
 
 LIBID = "fa28b361293b46668bcd1f209ada6983"
-LIBAPI = 0
-LIBPATCH = 2
+LIBAPI = 1
+LIBPATCH = 1
 
 DEFAULT_RELATION_NAME = "catalogue"
 
