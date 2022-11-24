@@ -37,7 +37,7 @@ class CatalogueConsumer(Object):
         self,
         charm,
         relation_name: str = DEFAULT_RELATION_NAME,
-        item: CatalogueItem = None,
+        item: Optional[CatalogueItem] = None,
         refresh_event: Optional[Union[BoundEvent, List[BoundEvent]]] = None,
     ):
         super().__init__(charm, relation_name)
