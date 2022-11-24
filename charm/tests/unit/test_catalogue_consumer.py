@@ -3,15 +3,12 @@
 #
 # Learn more about testing at: https://juju.is/docs/sdk/testing
 
-import json
 import textwrap
 import unittest
-from unittest.mock import patch
 
 from charms.catalogue_k8s.v1.catalogue import CatalogueConsumer, CatalogueItem
 from ops.charm import CharmBase
-from ops.framework import BoundEvent, EventBase, EventSource, Object, ObjectEvents
-from ops.model import ActiveStatus
+from ops.framework import EventBase, EventSource, Object, ObjectEvents
 from ops.testing import Harness
 
 
