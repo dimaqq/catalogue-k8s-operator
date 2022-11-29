@@ -10,7 +10,7 @@ Relate the charm to an ingress of your choice, followed by any charms implementi
 
 ## OCI Images
 
-The default OCI image for this charm is [`griefed/sui`](https://hub.docker.com/r/griefed/sui)
+The default OCI image for this charm is [the one built as part of this repo](https://github.com/canonical/catalogue-k8s-operator/tree/main/workload). It is published in the GitHub Container Registry as `ghcr.io/canonical/catalogue-k8s-operator`.
 
 ## Contributing
 
