@@ -9,3 +9,5 @@ jobs:
   release:
     uses: canonical/observability/.github/workflows/release-charm.yaml@main
     secrets: inherit
+    with:
+      charm-path: "charm"
