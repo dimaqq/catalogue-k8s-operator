@@ -46,9 +46,7 @@ class CatalogueCharm(CharmBase):
         self._info = CatalogueProvider(charm=self)
         self._ingress = IngressPerAppRequirer(charm=self, port=80, strip_prefix=True)
 
-        self.framework.observe(
-            self.on.catalogue_pebble_ready, self._on_catalogue_pebble_ready
-        )
+        self.framework.observe(self.on.catalogue_pebble_ready, self._on_catalogue_pebble_ready)
         self.framework.observe(self._info.on.items_changed, self._on_items_changed)
         self.framework.observe(self.on.upgrade_charm, self._on_upgrade)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
