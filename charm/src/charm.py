@@ -82,10 +82,13 @@ class CatalogueCharm(CharmBase):
         except:  # noqa
             self._update_status(BlockedStatus("Failed to write configuration"))
 
-        self._update_status(ActiveStatus())
+        if self.unit.is_leader():
+            self._update_status(ActiveStatus())
 
     def _update_status(self, status):
-        self.app.status = self.unit.status = status
+        if self.unit.is_leader():
+            self.app.status = status
+        self.unit.status = status
 
     def _on_upgrade(self, event):
         self.configure(self.items)
@@ -106,7 +109,9 @@ class CatalogueCharm(CharmBase):
         logger.info("Configuring %s application entries", len(items))
 
         self.workload.push(
-            CONFIG_PATH, json.dumps({**self.charm_config, "apps": items}), make_dirs=True
+            CONFIG_PATH,
+            json.dumps({**self.charm_config, "apps": items}),
+            make_dirs=True,
         )
 
     @property
