@@ -21,17 +21,10 @@ class TestCharm(unittest.TestCase):
     def setUp(self):
         self.harness = Harness(CatalogueCharm)
         self.addCleanup(self.harness.cleanup)
-        self.harness.begin_with_initial_hooks()
         self.harness.set_leader(True)
+        self.harness.begin_with_initial_hooks()
 
     def test_catalogue_pebble_ready(self):
-        # Given the catalogue container
-        # When pebble is ready
-        # Then the catalogue web server should be started
-
-        initial_plan = self._plan
-        self.assertEqual(initial_plan.to_yaml(), "{}\n")
-
         expected_plan = {
             "services": {
                 "catalogue": {
@@ -43,10 +36,8 @@ class TestCharm(unittest.TestCase):
             },
         }
 
-        self.harness.charm.on.catalogue_pebble_ready.emit(self._container)
-
-        updated_plan = self._plan.to_dict()
-        self.assertEqual(expected_plan, updated_plan)
+        initial_plan = self._plan.to_dict()
+        self.assertEqual(expected_plan, initial_plan)
 
         service = self._container.get_service("catalogue")
         self.assertTrue(service.is_running())
