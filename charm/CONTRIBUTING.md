@@ -1,5 +1,13 @@
 # Contributing
 
+![GitHub License](https://img.shields.io/github/license/canonical/catalogue-k8s-operator)
+![GitHub Commit Activity](https://img.shields.io/github/commit-activity/y/canonical/catalogue-k8s-operator)
+![GitHub Lines of Code](https://img.shields.io/tokei/lines/github/canonical/catalogue-k8s-operator)
+![GitHub Issues](https://img.shields.io/github/issues/canonical/catalogue-k8s-operator)
+![GitHub PRs](https://img.shields.io/github/issues-pr/canonical/catalogue-k8s-operator) 
+![GitHub Contributors](https://img.shields.io/github/contributors/canonical/catalogue-k8s-operator) 
+![GitHub Watchers](https://img.shields.io/github/watchers/canonical/catalogue-k8s-operator?style=social)
+
 ## Overview
 
 This document explains the processes and practices recommended for contributing enhancements to
