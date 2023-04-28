@@ -7,11 +7,10 @@ import json
 import unittest
 from unittest.mock import patch
 
+from charm import CatalogueCharm
 from charms.catalogue_k8s.v0.catalogue import DEFAULT_RELATION_NAME
 from ops.model import ActiveStatus
 from ops.testing import Harness
-
-from charm import CatalogueCharm
 
 CONTAINER_NAME = "catalogue"
 
