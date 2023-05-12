@@ -46,12 +46,18 @@ class CatalogueCharm(CharmBase):
         self._info = CatalogueProvider(charm=self)
         self._ingress = IngressPerAppRequirer(charm=self, port=80, strip_prefix=True)
 
-        self.framework.observe(self.on.catalogue_pebble_ready, self._on_catalogue_pebble_ready)
-        self.framework.observe(self._info.on.items_changed, self._on_items_changed)
+        self.framework.observe(
+            self.on.catalogue_pebble_ready, self._on_catalogue_pebble_ready  # pyright: ignore
+        )
+        self.framework.observe(
+            self._info.on.items_changed, self._on_items_changed  # pyright: ignore
+        )
         self.framework.observe(self.on.upgrade_charm, self._on_upgrade)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
-        self.framework.observe(self._ingress.on.ready, self._on_ingress_ready)
-        self.framework.observe(self._ingress.on.revoked, self._on_ingress_revoked)
+        self.framework.observe(self._ingress.on.ready, self._on_ingress_ready)  # pyright: ignore
+        self.framework.observe(
+            self._ingress.on.revoked, self._on_ingress_revoked  # pyright: ignore
+        )
 
     def _on_ingress_ready(self, event: IngressPerAppReadyEvent):
         logger.info("This app's ingress URL: %s", event.url)
