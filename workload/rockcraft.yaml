@@ -1,0 +1,25 @@
+name: catalogue 
+summary: A service catalogue for workloads running in Juju.
+description: A service catalogue for workloads running in Juju.
+version: "0.15.0"
+base: ubuntu:22.04
+license: Apache-2.0
+
+platforms:
+  amd64:
+
+parts:
+  catalogue:
+    plugin: nil 
+    source: .
+    stage-packages:
+      - nginx
+    override-build: |
+      mkdir -p ${CRAFT_PART_INSTALL}/etc/nginx
+      cp -R ./ui ${CRAFT_PART_INSTALL}/web
+      cp ./nginx.conf ${CRAFT_PART_INSTALL}/etc/nginx/nginx.conf
+services:
+  catalogue:
+    command: nginx -g 'daemon off;'
+    override: replace
+    startup: enabled
