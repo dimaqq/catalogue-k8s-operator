@@ -2,3 +2,7 @@ jsonschema
 ops
 lightkube >= 0.11
 lightkube-models >= 1.22.0.4
+
+# Cryptography
+# Deps: tls_certificates
+cryptography

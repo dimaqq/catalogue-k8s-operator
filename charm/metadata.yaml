@@ -18,6 +18,15 @@ requires:
     ingress:
         interface: ingress
         limit: 1
+    certificates:
+        interface: tls-certificates
+        limit: 1
+        description: |
+          Certificate and key files for the Catalogue web.
+
+peers:
+  replicas:
+    interface: catalogue_replica
 
 resources:
   catalogue-image:
