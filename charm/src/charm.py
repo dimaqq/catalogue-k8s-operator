@@ -247,7 +247,7 @@ class CatalogueCharm(CharmBase):
 
     @property
     def _tls_enabled(self) -> bool:
-        return bool(self.server_cert.cert)
+        return self.server_cert.enabled and self.workload.exists(CERT_PATH)
 
 
 if __name__ == "__main__":
