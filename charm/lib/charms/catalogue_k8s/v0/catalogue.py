@@ -21,7 +21,10 @@ logger = logging.getLogger(__name__)
 
 
 class CatalogueItem:
-    """`CatalogueItem` represents an application entry sent to a catalogue."""
+    """`CatalogueItem` represents an application entry sent to a catalogue.
+
+    The icon is an iconify mdi string; see https://icon-sets.iconify.design/mdi.
+    """
 
     def __init__(self, name: str, url: str, icon: str, description: str = ""):
         self.name = name
