@@ -13,7 +13,7 @@ from ops.framework import BoundEvent, EventBase, EventSource, Object, ObjectEven
 
 LIBID = "fa28b361293b46668bcd1f209ada6983"
 LIBAPI = 0
-LIBPATCH = 5
+LIBPATCH = 6
 
 DEFAULT_RELATION_NAME = "catalogue"
 
