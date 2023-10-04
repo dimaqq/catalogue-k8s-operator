@@ -9,7 +9,6 @@
 import json
 import logging
 import socket
-from typing import cast
 from urllib.parse import urlparse
 
 from charms.catalogue_k8s.v0.catalogue import (
@@ -18,7 +17,7 @@ from charms.catalogue_k8s.v0.catalogue import (
 )
 from charms.observability_libs.v0.cert_handler import CertHandler
 from charms.observability_libs.v1.kubernetes_service_patch import KubernetesServicePatch
-from charms.traefik_k8s.v1.ingress import (
+from charms.traefik_k8s.v2.ingress import (
     IngressPerAppReadyEvent,
     IngressPerAppRequirer,
 )
@@ -48,13 +47,11 @@ class CatalogueCharm(CharmBase):
         self._info = CatalogueProvider(charm=self)
         self._ingress = IngressPerAppRequirer(charm=self, port=80, strip_prefix=True)
 
-        url = self.hostname
-        extra_sans_dns = [cast(str, urlparse(url).hostname)] if url else None
         self.server_cert = CertHandler(
             self,
             key="catalogue-server-cert",
             peer_relation_name="replicas",
-            extra_sans_dns=extra_sans_dns,
+            extra_sans_dns=[socket.getfqdn()],
         )
 
         self.framework.observe(
@@ -81,7 +78,10 @@ class CatalogueCharm(CharmBase):
         logger.info("This app no longer has ingress")
 
     def _on_catalogue_pebble_ready(self, _):
-        self._configure(self.items)
+        # We set push_certs to True here to cover the upgrade sequence. When upgrade-charm fires,
+        # the container may not yet be ready, and the certs are written to non-persistent storage
+        # (which is a good thing).
+        self._configure(self.items, push_certs=True)
 
     def _update_status(self, status):
         if self.unit.is_leader():
@@ -89,6 +89,8 @@ class CatalogueCharm(CharmBase):
         self.unit.status = status
 
     def _on_upgrade(self, _):
+        # Ideally we would want to push certs on upgrade, but at this point we can't know for sure
+        # if pebble-ready (can_connect guard).
         self._configure(self.items)
 
     def _on_config_changed(self, _):
@@ -99,6 +101,11 @@ class CatalogueCharm(CharmBase):
 
     def _on_server_cert_changed(self, _):
         self._configure(self.items, push_certs=True)
+
+        # When server cert changes we need to update the scheme we inform traefik.
+        parsed = urlparse(self._internal_url)
+        port = parsed.port or 80 if parsed.scheme == "http" else 443
+        self._ingress.provide_ingress_requirements(scheme=parsed.scheme, port=port)
 
     def _push_certs(self):
         for path in [KEY_PATH, CERT_PATH, CA_CERT_PATH]:
@@ -168,7 +175,7 @@ class CatalogueCharm(CharmBase):
         return True
 
     def _update_web_server_config(self) -> bool:
-        config = NginxConfigBuilder(self._tls_enabled).build()
+        config = NginxConfigBuilder(self._is_tls_ready()).build()
 
         if self._running_nginx_config == config:
             return False
@@ -240,14 +247,22 @@ class CatalogueCharm(CharmBase):
             "links": json.loads(self.model.config["links"]),
         }
 
-    @property
-    def hostname(self) -> str:
-        """Unit's hostname."""
-        return socket.getfqdn()
+    def _is_tls_ready(self) -> bool:
+        """Returns True if the workload is ready to operate in TLS mode."""
+        return (
+            self.workload.can_connect()
+            and self.server_cert.enabled
+            and self.workload.exists(CERT_PATH)
+            and self.workload.exists(KEY_PATH)
+            and self.workload.exists(CA_CERT_PATH)
+        )
 
     @property
-    def _tls_enabled(self) -> bool:
-        return self.server_cert.enabled and self.workload.exists(CERT_PATH)
+    def _internal_url(self) -> str:
+        """Return the fqdn dns-based in-cluster (private) address of the catalogue server."""
+        scheme = "https" if self._is_tls_ready() else "http"
+        port = 80 if scheme == "http" else 443
+        return f"{scheme}://{socket.getfqdn()}:{port}"
 
 
 if __name__ == "__main__":
