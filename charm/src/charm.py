@@ -73,9 +73,11 @@ class CatalogueCharm(CharmBase):
 
     def _on_ingress_ready(self, event: IngressPerAppReadyEvent):
         logger.info("This app's ingress URL: %s", event.url)
+        self._configure(self.items, push_certs=True)
 
     def _on_ingress_revoked(self, _):
         logger.info("This app no longer has ingress")
+        self._configure(self.items, push_certs=True)
 
     def _on_catalogue_pebble_ready(self, _):
         # We set push_certs to True here to cover the upgrade sequence. When upgrade-charm fires,
