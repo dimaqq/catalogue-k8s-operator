@@ -5,7 +5,8 @@
 
 import json
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+from urllib.parse import urlparse
 
 from charm import CatalogueCharm
 from charms.catalogue_k8s.v1.catalogue import DEFAULT_RELATION_NAME
@@ -72,6 +73,54 @@ class TestCharm(unittest.TestCase):
             ],
             json.loads(data.read())["apps"],
         )
+
+    def test_server_cert(self):
+        # Test with TLS
+        self.harness.charm.server_cert = Mock(ca="mock_ca", cert="mock_cert", key="mock_key")
+        self.harness.charm._on_server_cert_changed(None)
+
+        internal_url = urlparse(self.harness.charm._internal_url)
+
+        self.assertEqual(internal_url.scheme, "https")
+        self.assertEqual(internal_url.port, 443)
+        self.assertEqual(self.harness.model.unit.status, ActiveStatus())
+
+        # Test with HTTP
+        self.harness.charm.server_cert = Mock()
+        self.harness.charm._on_server_cert_changed(None)
+
+        internal_url = urlparse(self.harness.charm._internal_url)
+        self.assertEqual(internal_url.scheme, "http")
+        self.assertEqual(internal_url.port, 80)
+
+    @patch("charm.logger")
+    @patch("charm.CatalogueCharm._configure")
+    def test_ingress(self, mock_configure, mock_logger):
+        class MockInfo:
+            @property
+            def items(self):
+                return {
+                    "name": "test_value",
+                }
+
+        # Test with ingress ready
+        self.harness.charm._info = MockInfo()
+        self.harness.charm._on_ingress_ready(Mock(url="https://testingress.com"))
+
+        mock_logger.info.assert_called_with(
+            "This app's ingress URL: %s", "https://testingress.com"
+        )
+        mock_configure.assert_called_with({"name": "test_value"}, push_certs=True)
+
+        mock_logger.reset_mock()
+        mock_configure.reset_mock()
+
+        # Test with ingress revoked
+        self.harness.charm._info = None
+        self.harness.charm._on_ingress_revoked(None)
+
+        mock_logger.info.assert_called_with("This app no longer has ingress")
+        mock_configure.assert_called_with([], push_certs=True)
 
     @property
     def _container(self):
