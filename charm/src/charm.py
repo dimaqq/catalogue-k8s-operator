@@ -9,6 +9,7 @@
 import json
 import logging
 import socket
+from typing import Optional
 from urllib.parse import urlparse
 
 from charms.catalogue_k8s.v1.catalogue import (
@@ -17,6 +18,8 @@ from charms.catalogue_k8s.v1.catalogue import (
 )
 from charms.observability_libs.v0.cert_handler import CertHandler
 from charms.observability_libs.v1.kubernetes_service_patch import KubernetesServicePatch
+from charms.tempo_k8s.v1.charm_tracing import trace_charm
+from charms.tempo_k8s.v2.tracing import TracingEndpointRequirer
 from charms.traefik_k8s.v2.ingress import (
     IngressPerAppReadyEvent,
     IngressPerAppRequirer,
@@ -34,6 +37,16 @@ ROOT_PATH = "/web"
 CONFIG_PATH = ROOT_PATH + "/config.json"
 
 
+@trace_charm(
+    tracing_endpoint="tracing_endpoint",
+    server_cert="server_cert_path",
+    extra_types=(
+        CatalogueProvider,
+        CertHandler,
+        IngressPerAppRequirer,
+        KubernetesServicePatch,
+    ),
+)
 class CatalogueCharm(CharmBase):
     """Catalogue charm class."""
 
@@ -43,6 +56,8 @@ class CatalogueCharm(CharmBase):
 
         port = ServicePort(80, name=f"{self.app.name}")
         self.service_patcher = KubernetesServicePatch(self, [port])
+
+        self._tracing = TracingEndpointRequirer(self, protocols=["otlp_http"])
 
         self._info = CatalogueProvider(charm=self)
         self._ingress = IngressPerAppRequirer(charm=self, port=80, strip_prefix=True)
@@ -265,6 +280,18 @@ class CatalogueCharm(CharmBase):
         scheme = "https" if self._is_tls_ready() else "http"
         port = 80 if scheme == "http" else 443
         return f"{scheme}://{socket.getfqdn()}:{port}"
+
+    @property
+    def tracing_endpoint(self) -> Optional[str]:
+        """Otlp http endpoint for charm instrumentation."""
+        if self._tracing.is_ready():
+            return self._tracing.get_endpoint("otlp_http")
+        return None
+
+    @property
+    def server_cert_path(self) -> Optional[str]:
+        """Server certificate path for tls tracing."""
+        return CERT_PATH
 
 
 if __name__ == "__main__":
