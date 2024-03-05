@@ -77,7 +77,10 @@ async def test_app_integration(ops_test: OpsTest):
 
     await ops_test.model.integrate(f"{APP_NAME}", alert_app_name)
     await ops_test.model.wait_for_idle(
-        apps=[APP_NAME, alert_app_name], status="active", raise_on_blocked=True, timeout=1000
+        apps=[APP_NAME, alert_app_name], status="active", raise_on_error=False, timeout=1000
+    )
+    await ops_test.model.wait_for_idle(
+        apps=[APP_NAME, alert_app_name], status="active", raise_on_blocked=True, timeout=60
     )
     # retrieve the content of /web/config.json which holds application data in the catalogue
     new_config = await run_juju_ssh_command(
