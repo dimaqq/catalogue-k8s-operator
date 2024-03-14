@@ -60,7 +60,6 @@ class CatalogueCharm(CharmBase):
         self._tracing = TracingEndpointRequirer(self, protocols=["otlp_http"])
 
         self._info = CatalogueProvider(charm=self)
-        self._ingress = IngressPerAppRequirer(charm=self, port=80, strip_prefix=True)
 
         self.server_cert = CertHandler(
             self,
@@ -68,7 +67,12 @@ class CatalogueCharm(CharmBase):
             peer_relation_name="replicas",
             extra_sans_dns=[socket.getfqdn()],
         )
-
+        self._ingress = IngressPerAppRequirer(
+            charm=self,
+            port=self._internal_port,
+            strip_prefix=True,
+            scheme=lambda: urlparse(self._internal_url).scheme,
+        )
         self.framework.observe(
             self.on.catalogue_pebble_ready, self._on_catalogue_pebble_ready  # pyright: ignore
         )
@@ -280,6 +284,12 @@ class CatalogueCharm(CharmBase):
         scheme = "https" if self._is_tls_ready() else "http"
         port = 80 if scheme == "http" else 443
         return f"{scheme}://{socket.getfqdn()}:{port}"
+
+    @property
+    def _internal_port(self) -> int:
+        """Return the port extracted from the internal URL."""
+        parsed_url = urlparse(self._internal_url)
+        return int(parsed_url.port or 80)
 
     @property
     def tracing_endpoint(self) -> Optional[str]:
