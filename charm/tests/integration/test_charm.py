@@ -20,7 +20,7 @@ METADATA = yaml.safe_load(Path("./metadata.yaml").read_text())
 APP_NAME = METADATA["name"]
 
 ssc_app_name = "ssc"
-alert_app_name = "alertmanager-k8s"
+prometheus_app_name = "prometheus-k8s"
 
 app_names = [APP_NAME, ssc_app_name]
 
@@ -68,19 +68,19 @@ async def test_tls(ops_test: OpsTest):
 async def test_app_integration(ops_test: OpsTest):
     await asyncio.gather(
         ops_test.model.deploy(
-            alert_app_name,
-            application_name=alert_app_name,
+            prometheus_app_name,
+            application_name=prometheus_app_name,
             channel="1.0/stable",
             trust=True,
         ),
     )
 
-    await ops_test.model.integrate(f"{APP_NAME}", alert_app_name)
+    await ops_test.model.integrate(f"{APP_NAME}", prometheus_app_name)
     await ops_test.model.wait_for_idle(
-        apps=[APP_NAME, alert_app_name], status="active", raise_on_error=False, timeout=1000
+        apps=[APP_NAME, prometheus_app_name], status="active", raise_on_error=False, timeout=1000
     )
     await ops_test.model.wait_for_idle(
-        apps=[APP_NAME, alert_app_name], status="active", raise_on_blocked=True, timeout=60
+        apps=[APP_NAME, prometheus_app_name], status="active", raise_on_blocked=True, timeout=60
     )
     # retrieve the content of /web/config.json which holds application data in the catalogue
     new_config = await run_juju_ssh_command(
@@ -91,4 +91,4 @@ async def test_app_integration(ops_test: OpsTest):
     )
     config_dict = json.loads(new_config)
     first_app_name = config_dict["apps"][0]["name"]
-    assert first_app_name == "Alertmanager"
+    assert first_app_name == "Prometheus"
