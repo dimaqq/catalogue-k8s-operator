@@ -6,4 +6,5 @@
 
 ## Description
 
+
 This repository holds the Catalogue charmed operator (in the `charm/` folder), together with its workload (in the `workload/` folder).
