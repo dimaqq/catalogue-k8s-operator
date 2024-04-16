@@ -17,14 +17,12 @@ from charms.catalogue_k8s.v1.catalogue import (
     CatalogueProvider,
 )
 from charms.observability_libs.v0.cert_handler import CertHandler
-from charms.observability_libs.v1.kubernetes_service_patch import KubernetesServicePatch
 from charms.tempo_k8s.v1.charm_tracing import trace_charm
 from charms.tempo_k8s.v2.tracing import TracingEndpointRequirer
 from charms.traefik_k8s.v2.ingress import (
     IngressPerAppReadyEvent,
     IngressPerAppRequirer,
 )
-from lightkube.models.core_v1 import ServicePort
 from nginx_config import CA_CERT_PATH, CERT_PATH, KEY_PATH, NGINX_CONFIG_PATH, NginxConfigBuilder
 from ops.charm import CharmBase
 from ops.main import main
@@ -44,7 +42,6 @@ CONFIG_PATH = ROOT_PATH + "/config.json"
         CatalogueProvider,
         CertHandler,
         IngressPerAppRequirer,
-        KubernetesServicePatch,
     ),
 )
 class CatalogueCharm(CharmBase):
@@ -54,8 +51,7 @@ class CatalogueCharm(CharmBase):
         super().__init__(*args)
         self.name = "catalogue"  # container, layer, service
 
-        port = ServicePort(80, name=f"{self.app.name}")
-        self.service_patcher = KubernetesServicePatch(self, [port])
+        self.unit.open_port(protocol="tcp", port=80)
 
         self._tracing = TracingEndpointRequirer(self, protocols=["otlp_http"])
 

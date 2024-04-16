@@ -17,7 +17,6 @@ CONTAINER_NAME = "catalogue"
 
 
 class TestCharm(unittest.TestCase):
-    @patch("charm.KubernetesServicePatch", lambda x, y: None)
     def setUp(self):
         self.harness = Harness(CatalogueCharm)
         self.addCleanup(self.harness.cleanup)
