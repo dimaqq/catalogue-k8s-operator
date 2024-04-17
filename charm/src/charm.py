@@ -51,7 +51,7 @@ class CatalogueCharm(CharmBase):
         super().__init__(*args)
         self.name = "catalogue"  # container, layer, service
 
-        self.unit.open_port(protocol="tcp", port=80)
+        self.unit.set_ports(80)
 
         self._tracing = TracingEndpointRequirer(self, protocols=["otlp_http"])
 
