@@ -4,12 +4,14 @@
 # Learn more about testing at: https://juju.is/docs/sdk/testing
 
 import json
+import socket
 import unittest
 from unittest.mock import Mock, patch
 from urllib.parse import urlparse
 
 from charm import CatalogueCharm
 from charms.catalogue_k8s.v1.catalogue import DEFAULT_RELATION_NAME
+from ops.charm import ActionEvent
 from ops.model import ActiveStatus
 from ops.testing import Harness
 
@@ -19,6 +21,7 @@ CONTAINER_NAME = "catalogue"
 class TestCharm(unittest.TestCase):
     def setUp(self):
         self.harness = Harness(CatalogueCharm)
+        self.harness.set_model_name("test-model")
         self.addCleanup(self.harness.cleanup)
         self.harness.set_leader(True)
         self.harness.begin_with_initial_hooks()
@@ -120,6 +123,23 @@ class TestCharm(unittest.TestCase):
 
         mock_logger.info.assert_called_with("This app no longer has ingress")
         mock_configure.assert_called_with([], push_certs=True)
+
+    def test_get_url_action_no_ingress(self):
+        action_event = Mock(spec=ActionEvent)
+        self.harness.charm._get_url(action_event)
+        action_event.set_results.assert_called_once_with({"url": f"http://{socket.getfqdn()}:80"})
+
+    @patch("ops.model.Model.get_binding", lambda *_, **__: None)
+    def test_get_url_action_ingress(self):
+        rel_id = self.harness.add_relation("ingress", "remote")
+        self.harness.add_relation_unit(rel_id, "remote/0")
+        self.harness.update_relation_data(
+            rel_id, "remote", {"ingress": json.dumps({"url": "https://endpoint/subpath"})}
+        )
+
+        action_event = Mock(spec=ActionEvent)
+        self.harness.charm._get_url(action_event)
+        action_event.set_results.assert_called_once_with({"url": "https://endpoint/subpath"})
 
     @property
     def _container(self):

@@ -1,0 +1,3 @@
+get-url:
+  description: |
+    Gets the external endpoint of the workload in case its proxied by an ingress. Otherwise, returns the workload's cluster fqdn.

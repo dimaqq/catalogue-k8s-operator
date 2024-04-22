@@ -24,7 +24,7 @@ from charms.traefik_k8s.v2.ingress import (
     IngressPerAppRequirer,
 )
 from nginx_config import CA_CERT_PATH, CERT_PATH, KEY_PATH, NGINX_CONFIG_PATH, NginxConfigBuilder
-from ops.charm import CharmBase
+from ops.charm import ActionEvent, CharmBase
 from ops.main import main
 from ops.model import ActiveStatus, BlockedStatus, WaitingStatus
 from ops.pebble import ChangeError, Error, Layer, PathError, ProtocolError
@@ -84,6 +84,23 @@ class CatalogueCharm(CharmBase):
         self.framework.observe(
             self.server_cert.on.cert_changed,  # pyright: ignore
             self._on_server_cert_changed,
+        )
+        self.framework.observe(self.on.get_url_action, self._get_url)
+
+    def _get_url(self, event: ActionEvent):
+        """Return the external hostname to be passed to ingress via the relation.
+
+        If we do not have an ingress, then use the pod dns name as hostname.
+        Relying on cluster's DNS service, those dns names are routable virtually
+        exclusively inside the cluster.
+        """
+        output = self._internal_url
+        if ingress_url := self._ingress.url:
+            output = ingress_url
+        event.set_results(
+            {
+                "url": output,
+            }
         )
 
     def _on_ingress_ready(self, event: IngressPerAppReadyEvent):
