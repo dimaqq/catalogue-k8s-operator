@@ -4,6 +4,7 @@
 # Learn more about testing at: https://juju.is/docs/sdk/testing
 
 import json
+import os
 import socket
 import unittest
 from unittest.mock import Mock, patch
@@ -20,6 +21,7 @@ CONTAINER_NAME = "catalogue"
 
 class TestCharm(unittest.TestCase):
     def setUp(self):
+        os.environ["JUJU_VERSION"] = "3.0.3"
         self.harness = Harness(CatalogueCharm)
         self.harness.set_model_name("test-model")
         self.addCleanup(self.harness.cleanup)
@@ -78,7 +80,9 @@ class TestCharm(unittest.TestCase):
 
     def test_server_cert(self):
         # Test with TLS
-        self.harness.charm.server_cert = Mock(ca="mock_ca", cert="mock_cert", key="mock_key")
+        self.harness.charm.server_cert = Mock(
+            ca_cert="mock_ca", server_cert="mock_cert", private_key="mock_key"
+        )
         self.harness.charm._on_server_cert_changed(None)
 
         internal_url = urlparse(self.harness.charm._internal_url)

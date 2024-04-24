@@ -16,7 +16,7 @@ from charms.catalogue_k8s.v1.catalogue import (
     CatalogueItemsChangedEvent,
     CatalogueProvider,
 )
-from charms.observability_libs.v0.cert_handler import CertHandler
+from charms.observability_libs.v1.cert_handler import CertHandler
 from charms.tempo_k8s.v1.charm_tracing import trace_charm
 from charms.tempo_k8s.v2.tracing import TracingEndpointRequirer
 from charms.traefik_k8s.v2.ingress import (
@@ -60,8 +60,7 @@ class CatalogueCharm(CharmBase):
         self.server_cert = CertHandler(
             self,
             key="catalogue-server-cert",
-            peer_relation_name="replicas",
-            extra_sans_dns=[socket.getfqdn()],
+            sans=[socket.getfqdn()],
         )
         self._ingress = IngressPerAppRequirer(
             charm=self,
@@ -145,14 +144,14 @@ class CatalogueCharm(CharmBase):
         for path in [KEY_PATH, CERT_PATH, CA_CERT_PATH]:
             self.workload.remove_path(path, recursive=True)
 
-        if self.server_cert.ca:
-            self.workload.push(CA_CERT_PATH, self.server_cert.ca, make_dirs=True)
+        if self.server_cert.ca_cert:
+            self.workload.push(CA_CERT_PATH, self.server_cert.ca_cert, make_dirs=True)
 
-        if self.server_cert.cert:
-            self.workload.push(CERT_PATH, self.server_cert.cert, make_dirs=True)
+        if self.server_cert.server_cert:
+            self.workload.push(CERT_PATH, self.server_cert.server_cert, make_dirs=True)
 
-        if self.server_cert.key:
-            self.workload.push(KEY_PATH, self.server_cert.key, make_dirs=True)
+        if self.server_cert.private_key:
+            self.workload.push(KEY_PATH, self.server_cert.private_key, make_dirs=True)
 
     def _configure(self, items, push_certs: bool = False):
         if not self.workload.can_connect():
