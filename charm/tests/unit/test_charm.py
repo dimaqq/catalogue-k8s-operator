@@ -78,13 +78,21 @@ class TestCharm(unittest.TestCase):
             json.loads(data.read())["apps"],
         )
 
+    @patch.multiple(
+        "charm.CatalogueCharm",
+        _push_certs=lambda *_: None,
+    )
     def test_server_cert(self):
+        patcher = patch.object(CatalogueCharm, "_is_tls_ready")
+        self.mock_tls_ready = patcher.start()
+        self.addCleanup(patcher.stop)
         # Test with TLS
         self.harness.charm.server_cert = Mock(
             ca_cert="mock_ca", server_cert="mock_cert", private_key="mock_key"
         )
-        self.harness.charm._on_server_cert_changed(None)
 
+        self.mock_tls_ready.return_value = True
+        self.harness.charm._on_server_cert_changed(None)
         internal_url = urlparse(self.harness.charm._internal_url)
 
         self.assertEqual(internal_url.scheme, "https")
@@ -92,6 +100,7 @@ class TestCharm(unittest.TestCase):
         self.assertEqual(self.harness.model.unit.status, ActiveStatus())
 
         # Test with HTTP
+        self.mock_tls_ready.return_value = False
         self.harness.charm.server_cert = Mock()
         self.harness.charm._on_server_cert_changed(None)
 
